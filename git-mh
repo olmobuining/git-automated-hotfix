@@ -1,0 +1,195 @@
+#!/bin/sh
+#
+# Quick way to create a hotfix from the master branch.
+# with the currently changed files.
+#
+# @author Olmo
+# @created 2015-09-24
+# @updated 2015-10-23 Added the PRE-COMMIT check, with the possibility to continue with a '--no-verify'
+# @updated 2015-10-26 Change if statement(it was the wrong way around)
+# @updated 2015-10-30 Add check: If a hotfix already exists, exit out of the script, otherwise it will commit into the master..
+#
+
+[ ! -e .git/HEAD ] && echo "not a git repository?" >&2 && exit 1
+
+CHANGED=$(git diff-index --name-only HEAD --)  
+if [ -n "$CHANGED" ]; then
+
+    hotfixcheck=$(git branch | grep -E "hotfix/" )  
+
+    if [ -n "$hotfixcheck" ]; then
+        echo -e "\033[31mFOUT\033[0m -- A hotfix already exists! please finish it first!"
+        exit;
+    fi
+
+
+
+    # start PRE-COMMIT check
+    echo -e "\033[97m###\033[92mPre-Commit\e[97m###"
+
+    FILES_PATTERN='(\..+)?$'
+    FORBIDDEN="console\.(debug|info|log|warn)\([^)]*\)|var_dump\([^)]*\)|print_r\([^)]*\)|^dd\([^)]*\)|dv\([^)]*\)|<<<<<<<|=======|>>>>>>>"
+    
+    # Check for cached files (added for the commit) for a forbidden pattern.
+    CHECK=$(git diff --cached --name-only | grep -E $FILES_PATTERN | xargs grep -E --with-filename -n $FORBIDDEN | grep -v '//')
+    # Check for files that are not yet added for a forbidden pattern.
+    CHECK2=$(git diff --name-only | grep -E $FILES_PATTERN | xargs grep -E --with-filename -n $FORBIDDEN | grep -v '//')
+    # There are no forbidden patterns found by default.
+    FAULT=0;
+
+    printf "PRE-COMMIT resultaat: "
+
+    # Check the files that are added for commit
+    if [ -n "$CHECK" ];
+    then
+        echo -e "\033[31mFOUT\033[0m"
+        echo -e "${CHECK}"
+        FAULT=1;
+    fi
+
+    # Check the files that are not added yet
+    if [ -n "$CHECK2" ];
+    then
+        echo -e "\033[31mFOUT\033[0m"
+        echo -e "${CHECK2}"
+        FAULT=1;
+    fi
+
+    # Are there any forbidden patterns found? 
+    if [ "$FAULT" == 1 ]; then
+        echo -e ""
+        # Ask if you would like to continue
+        read -p "PRE-COMMIT failed. Would you like to continue with a --no-verify? [y/n] " -n 1 -r
+        echo
+        if [ "$REPLY" = "n" ]; then
+            printf "\033[31mSTOPPED\033[0m\nPlease run it again after you've fixed the mistakes, no action taken now"
+            echo -e ""
+            exit;
+        fi
+    else 
+        # Everything is A-ok! 
+        printf " \033[32mGOED\033[0m"
+    fi
+    # Only display this message when you choose to continue and had a forbidden pattern found
+    if [ "$FAULT" == 1 ]; then
+        printf "\n\033[32mContinuing with a '--no-verify'\033[0m"
+    fi
+    # end PRE-COMMIT check
+
+    # Define separator
+    SEPA="\033[34m####################################\033[0m\n";
+
+    if [ -n "$1" ]; then
+    
+        echo " "
+        printf $SEPA
+        echo "##### Stash changes for $1" 
+        printf $SEPA
+        git stash
+
+        echo " "
+        printf $SEPA
+        echo "##### Update DEVELOP"
+        printf $SEPA
+        git checkout develop
+        git pull
+        
+        echo " "
+        printf $SEPA
+        echo "##### Update MASTER"
+        printf $SEPA
+        git checkout master
+        git pull
+        
+        echo " "
+        printf $SEPA
+        echo "##### Create hotfix"
+        printf $SEPA
+        git flow hotfix start $1
+        
+        echo " "
+        printf $SEPA
+        echo "##### POP stash"
+        printf $SEPA
+        git stash pop
+        
+        echo " "
+        printf $SEPA
+        echo "##### Add all files"
+        printf $SEPA
+        git add --all
+        
+        echo " "
+        printf $SEPA
+        echo "##### Commit message && Commit"
+        printf $SEPA
+
+        if [ -n "$2" ]; then
+            # If second argument isset, set it to the user input
+            USERINPUT=$2
+        else 
+            # If the second argument is not set, ask for it.
+            echo -n "Commit message WITHOUT the ticket number: "
+            read USERINPUT
+        fi
+        
+        if [ -n "$USERINPUT" ]; then
+            if [ "$FAULT" == 1 ]; then
+                git commit -m --no-verify "#$1 $USERINPUT"
+            else
+                git commit -m "#$1 $USERINPUT"
+            fi
+            
+            echo " "
+            printf $SEPA
+            echo "##### Finish hotfix"
+            printf $SEPA
+            git flow hotfix finish -n $1
+            
+            echo " "
+            printf $SEPA
+            echo "##### Update DEVELOP"
+            printf $SEPA
+            git checkout develop
+            git pull
+            git push
+            
+            echo " "
+            printf $SEPA
+            echo "##### Update MASTER"
+            printf $SEPA
+            git checkout master
+            git pull
+            git push
+            
+            echo " "
+            echo " "
+            printf $SEPA
+            printf $SEPA
+            printf $SEPA
+            echo " "
+            echo " Finished!"
+            echo " Now your hotfix is live."
+            echo "  "
+            echo " @author Olmo Buining"
+            echo " @created 2015-09-24"
+            echo " "
+            printf $SEPA
+            printf $SEPA
+            printf $SEPA
+            echo " "
+            echo " "
+    
+        else
+            echo "STOP no commit message"
+            echo "Please finish the progress to finsh this hotfix"
+            echo "Files are added, but no commit done."
+        fi
+        
+        
+    else
+        echo "Please enter a ticket number first!" 
+    fi
+else
+    echo "No changes made yet, make your changes (uncommited)"
+fi
