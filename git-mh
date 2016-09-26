@@ -168,11 +168,11 @@ if [ -n "$CHANGED" ]; then
             printf $SEPA
             printf $SEPA
             echo " "
-            echo " Finished!"
-            echo " Now your hotfix is live."
+            echo " Finished your hotfix at $(date)"
+            echo " Note: it can take about 5 minutes before it is visible."
             echo "  "
+            echo " @repository https://github.com/olmobuining/git-automated-hotfix"
             echo " @author Olmo Buining"
-            echo " @created 2015-09-24"
             echo " "
             printf $SEPA
             printf $SEPA
