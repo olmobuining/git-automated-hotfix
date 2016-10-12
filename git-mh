@@ -12,20 +12,25 @@
 
 [ ! -e .git/HEAD ] && echo "not a git repository?" >&2 && exit 1
 
-CHANGED=$(git diff-index --name-only HEAD --)  
+CHANGED=$(git diff-index --name-only HEAD --);
 if [ -n "$CHANGED" ]; then
 
-    hotfixcheck=$(git branch | grep -E "hotfix/" )  
+    hotfixcheck=$(git branch | grep -E "hotfix/" );
 
     if [ -n "$hotfixcheck" ]; then
-        echo -e "\033[31mFOUT\033[0m -- A hotfix already exists! please finish it first!"
+        echo -e "\033[31mERROR\033[0m -- A hotfix already exists! please finish it first!";
         exit;
     fi
 
+    mergeconflicts=$(git ls-files -u);
 
+    if [ -n "$mergeconflicts" ]; then
+        echo -e "\033[31mERROR\033[0m -- Please fix the merge conflicts first";
+        exit;
+    fi
 
     # start PRE-COMMIT check
-    echo -e "\033[97m###\033[92mPre-Commit\e[97m###"
+    echo -e "\033[97m###\033[92mPre-Commit\e[97m###";
 
     FILES_PATTERN='(\..+)?$'
     FORBIDDEN="console\.(debug|info|log|warn)\([^)]*\)|var_dump\([^)]*\)|print_r\([^)]*\)|^dd\([^)]*\)|dv\([^)]*\)|<<<<<<<|=======|>>>>>>>"
@@ -42,7 +47,7 @@ if [ -n "$CHANGED" ]; then
     # Check the files that are added for commit
     if [ -n "$CHECK" ];
     then
-        echo -e "\033[31mFOUT\033[0m"
+        echo -e "\033[31mERROR\033[0m"
         echo -e "${CHECK}"
         FAULT=1;
     fi
@@ -50,7 +55,7 @@ if [ -n "$CHANGED" ]; then
     # Check the files that are not added yet
     if [ -n "$CHECK2" ];
     then
-        echo -e "\033[31mFOUT\033[0m"
+        echo -e "\033[31mERROR\033[0m"
         echo -e "${CHECK2}"
         FAULT=1;
     fi
@@ -68,7 +73,7 @@ if [ -n "$CHANGED" ]; then
         fi
     else 
         # Everything is A-ok! 
-        printf " \033[32mGOED\033[0m"
+        printf " \033[32mOK\033[0m"
     fi
     # Only display this message when you choose to continue and had a forbidden pattern found
     if [ "$FAULT" == 1 ]; then
@@ -101,6 +106,14 @@ if [ -n "$CHANGED" ]; then
         git checkout master
         git pull
         
+        # Check for merge conflicts
+        mergeconflicts=$(git ls-files -u);
+    
+        if [ -n "$mergeconflicts" ]; then
+            echo -e "\033[31mERROR\033[0m -- Please fix the merge conflicts first";
+            exit;
+        fi
+        
         echo " "
         printf $SEPA
         echo "##### Create hotfix"
@@ -112,6 +125,14 @@ if [ -n "$CHANGED" ]; then
         echo "##### POP stash"
         printf $SEPA
         git stash pop
+        
+        # Check for merge conflicts
+        mergeconflicts=$(git ls-files -u);
+    
+        if [ -n "$mergeconflicts" ]; then
+            echo -e "\033[31mERROR\033[0m -- Please fix the merge conflicts first";
+            exit;
+        fi
         
         echo " "
         printf $SEPA
@@ -152,6 +173,15 @@ if [ -n "$CHANGED" ]; then
             printf $SEPA
             git checkout develop
             git pull
+            
+            # Check for merge conflicts
+            mergeconflicts=$(git ls-files -u);
+        
+            if [ -n "$mergeconflicts" ]; then
+                echo -e "\033[31mERROR\033[0m -- Please fix the merge conflicts first, after please push master and develop";
+                exit;
+            fi
+            
             git push
             
             echo " "
@@ -160,7 +190,17 @@ if [ -n "$CHANGED" ]; then
             printf $SEPA
             git checkout master
             git pull
+            
+            # Check for merge conflicts
+            mergeconflicts=$(git ls-files -u);
+        
+            if [ -n "$mergeconflicts" ]; then
+                echo -e "\033[31mERROR\033[0m -- Please fix the merge conflicts first, after please push master";
+                exit;
+            fi
+            
             git push
+            
             
             echo " "
             echo " "
