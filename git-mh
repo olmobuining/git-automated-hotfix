@@ -213,7 +213,7 @@ if [ -n "$CHANGED" ]; then
             echo " Note: it can take about 5 minutes before it is visible."
             echo "  "
             echo " @repository https://github.com/olmobuining/git-automated-hotfix"
-            echo " @version 0.91"
+            echo " @version 0.92"
             echo " "
             printf $SEPA
             printf $SEPA
