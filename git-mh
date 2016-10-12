@@ -8,6 +8,7 @@
 # @updated 2015-10-23 Added the PRE-COMMIT check, with the possibility to continue with a '--no-verify'
 # @updated 2015-10-26 Change if statement(it was the wrong way around)
 # @updated 2015-10-30 Add check: If a hotfix already exists, exit out of the script, otherwise it will commit into the master..
+# @updated 2016-10-12 Add merge conflict checks
 #
 
 [ ! -e .git/HEAD ] && echo "not a git repository?" >&2 && exit 1
