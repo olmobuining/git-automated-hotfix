@@ -3,13 +3,14 @@
 # Quick way to create a hotfix from the master branch.
 # with the currently changed files.
 #
+# @version 0.921
 # @author Olmo
 # @created 2015-09-24
 # @updated 2015-10-23 Added the PRE-COMMIT check, with the possibility to continue with a '--no-verify'
 # @updated 2015-10-26 Change if statement(it was the wrong way around)
 # @updated 2015-10-30 Add check: If a hotfix already exists, exit out of the script, otherwise it will commit into the master..
 # @updated 2016-10-12 Add merge conflict checks
-# @updated 2017-04-24 Correct echo or printf. Also added a check if the answer of no-verify was really y or n.
+# @updated 2017-04-24 echo -> echo, added some newlines.
 #
 
 [ ! -e .git/HEAD ] && echo "not a git repository?" >&2 && exit 1
