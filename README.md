@@ -3,4 +3,4 @@ This script is automates the creation of hotfixes. If you've editted files in th
 
 NOTE: Requires git flow : https://github.com/nvie/gitflow
 
-Version: `0.92`
+Version: `0.921`
