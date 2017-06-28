@@ -37,7 +37,7 @@ if [ -n "$CHANGED" ]; then
 
     FILES_PATTERN='(\..+)?$'
     FORBIDDEN="console\.(debug|info|log|warn)\([^)]*\)|var_dump\([^)]*\)|print_r\([^)]*\)|^dd\([^)]*\)|dv\([^)]*\)|<<<<<<<|=======|>>>>>>>"
-    
+
     # Check for cached files (added for the commit) for a forbidden pattern.
     CHECK=$(git diff --cached --name-only | grep -E $FILES_PATTERN | xargs grep -E --with-filename -n $FORBIDDEN | grep -v '//')
     # Check for files that are not yet added for a forbidden pattern.
@@ -63,7 +63,7 @@ if [ -n "$CHANGED" ]; then
         FAULT=1;
     fi
 
-    # Are there any forbidden patterns found? 
+    # Are there any forbidden patterns found?
     if [ "$FAULT" == 1 ]; then
         echo " "
         # Ask if you would like to continue
@@ -79,8 +79,8 @@ if [ -n "$CHANGED" ]; then
             echo ""
             exit;
         fi
-    else 
-        # Everything is A-ok! 
+    else
+        # Everything is A-ok!
         echo " \033[32mOK\033[0m"
     fi
     # Only display this message when you choose to continue and had a forbidden pattern found
@@ -93,61 +93,61 @@ if [ -n "$CHANGED" ]; then
     SEPA="\033[34m####################################\033[0m";
 
     if [ -n "$1" ]; then
-    
+
         echo " "
         echo $SEPA
         echo "##### Stash changes for $1"
         echo $SEPA
-    #git    git stash
+        git stash
 
         echo " "
         echo $SEPA
         echo "##### Update DEVELOP"
         echo $SEPA
-    #git    git checkout develop
-    #git    git pull
-        
+        git checkout develop
+        git pull
+
         echo " "
         echo $SEPA
         echo "##### Update MASTER"
         echo $SEPA
-    #git    git checkout master
-    #git    git pull
-        
+        git checkout master
+        git pull
+
         # Check for merge conflicts
         mergeconflicts=$(git ls-files -u);
-    
+
         if [ -n "$mergeconflicts" ]; then
             echo "\033[31mERROR\033[0m -- Please fix the merge conflicts first";
             exit;
         fi
-        
+
         echo " "
         echo $SEPA
         echo "##### Create hotfix"
         echo $SEPA
-    #git    git flow hotfix start $1
-        
+        git flow hotfix start $1
+
         echo " "
         echo $SEPA
         echo "##### POP stash"
         echo $SEPA
-    #git    git stash pop
-        
+        git stash pop
+
         # Check for merge conflicts
         mergeconflicts=$(git ls-files -u);
-    
+
         if [ -n "$mergeconflicts" ]; then
             echo "\033[31mERROR\033[0m -- Please fix the merge conflicts first";
             exit;
         fi
-        
+
         echo " "
         echo $SEPA
         echo "##### Add all files"
         echo $SEPA
-    #git    git add --all
-        
+        git add --all
+
         echo " "
         echo $SEPA
         echo "##### Commit message && Commit"
@@ -156,58 +156,58 @@ if [ -n "$CHANGED" ]; then
         if [ -n "$2" ]; then
             # If second argument isset, set it to the user input
             USERINPUT=$2
-        else 
+        else
             # If the second argument is not set, ask for it.
             echo "Commit message WITHOUT the ticket number: "
             read USERINPUT
         fi
-        
+
         if [ -n "$USERINPUT" ]; then
-            #gitif [ "$FAULT" == 1 ]; then
-            #git    git commit -m "#$1 $USERINPUT" --no-verify
-            #gitelse
-            #git    git commit -m "#$1 $USERINPUT"
-            #gitfi
-            
+            if [ "$FAULT" == 1 ]; then
+                git commit -m "#$1 $USERINPUT" --no-verify
+            else
+                git commit -m "#$1 $USERINPUT"
+            fi
+
             echo " "
             echo $SEPA
             echo "##### Finish hotfix"
             echo $SEPA
-        #git    git flow hotfix finish -n $1
-            
+            git flow hotfix finish -n $1
+
             echo " "
             echo $SEPA
             echo "##### Update DEVELOP"
             echo $SEPA
-        #git    git checkout develop
-        #git    git pull
-            
+            git checkout develop
+            git pull
+
             # Check for merge conflicts
             mergeconflicts=$(git ls-files -u);
-        
+
             if [ -n "$mergeconflicts" ]; then
                 echo "\033[31mERROR\033[0m -- Please fix the merge conflicts first, after please push master and develop";
                 exit;
             fi
-            
-        #git    git push
-            
+
+            git push
+
             echo " "
             echo $SEPA
             echo "##### Update MASTER"
             echo $SEPA
-        #git    git checkout master
-        #git    git pull
-            
+            git checkout master
+            git pull
+
             # Check for merge conflicts
             mergeconflicts=$(git ls-files -u);
-        
+
             if [ -n "$mergeconflicts" ]; then
                 echo "\033[31mERROR\033[0m -- Please fix the merge conflicts first, after please push master";
                 exit;
             fi
-            
-        #git    git push
+
+            git push
             
             
             echo " "
