@@ -64,7 +64,7 @@ if [ -n "$CHANGED" ]; then
     fi
 
     # Are there any forbidden patterns found?
-    if [ "$FAULT" == 1 ]; then
+    if [ "$FAULT" = 1 ]; then
         echo " "
         # Ask if you would like to continue
         read -p "PRE-COMMIT failed. Would you like to continue with a --no-verify? [y/n] " -n 1 -r
@@ -84,7 +84,7 @@ if [ -n "$CHANGED" ]; then
         echo " \033[32mOK\033[0m"
     fi
     # Only display this message when you choose to continue and had a forbidden pattern found
-    if [ "$FAULT" == 1 ]; then
+    if [ "$FAULT" = 1 ]; then
         echo "\033[32mContinuing with a '--no-verify'\033[0m"
     fi
     # end PRE-COMMIT check
@@ -163,7 +163,7 @@ if [ -n "$CHANGED" ]; then
         fi
 
         if [ -n "$USERINPUT" ]; then
-            if [ "$FAULT" == 1 ]; then
+            if [ "$FAULT" = 1 ]; then
                 git commit -m "#$1 $USERINPUT" --no-verify
             else
                 git commit -m "#$1 $USERINPUT"
