@@ -105,14 +105,14 @@ if [ -n "$CHANGED" ]; then
         echo "##### Update DEVELOP"
         echo $SEPA
         git checkout develop
-        git pull
+        git pull -r
 
         echo " "
         echo $SEPA
         echo "##### Update MASTER"
         echo $SEPA
         git checkout master
-        git pull
+        git pull -r
 
         # Check for merge conflicts
         mergeconflicts=$(git ls-files -u);
@@ -180,7 +180,7 @@ if [ -n "$CHANGED" ]; then
             echo "##### Update DEVELOP"
             echo $SEPA
             git checkout develop
-            git pull
+            git pull -r
 
             # Check for merge conflicts
             mergeconflicts=$(git ls-files -u);
@@ -197,7 +197,7 @@ if [ -n "$CHANGED" ]; then
             echo "##### Update MASTER"
             echo $SEPA
             git checkout master
-            git pull
+            git pull -r
 
             # Check for merge conflicts
             mergeconflicts=$(git ls-files -u);
